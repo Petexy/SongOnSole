@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.petexy.songonsole</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+
+  <name>Music</name>
+  <name xml:lang="de">Musik</name>
+  <name xml:lang="es">Música</name>
+  <name xml:lang="fr">Musique</name>
+  <name xml:lang="hi">संगीत</name>
+  <name xml:lang="pl">Muzyka</name>
+  <name xml:lang="pt_BR">Músicas</name>
+  <name xml:lang="ru">Музыка</name>
+  <name xml:lang="zh_CN">音乐</name>
+  <summary>Play your music with a controller</summary>
+  <summary xml:lang="de">Hören Sie Ihre Musik mit einem Controller</summary>
+  <summary xml:lang="es">Escuche su música con un mando</summary>
+  <summary xml:lang="fr">Écoutez votre musique à la manette</summary>
+  <summary xml:lang="hi">कंट्रोलर से अपना संगीत सुनें</summary>
+  <summary xml:lang="pl">Słuchaj swojej muzyki za pomocą kontrolera</summary>
+  <summary xml:lang="pt_BR">Ouça suas músicas com um controle</summary>
+  <summary xml:lang="ru">Слушайте свою музыку с контроллера</summary>
+  <summary xml:lang="zh_CN">用手柄播放您的音乐</summary>
+
+  <description>
+    <p>
+      Music is a library and a player drawn in the LineXinBar design language:
+      the same colours, glass, motion and marks as the shell it was made for,
+      and driven from a controller, a keyboard and a pointer at once.
+    </p>
+    <p>
+      Your songs are gathered from the folders you name, read for their tags
+      and their artwork, and laid out five ways — every song by name, a wall of
+      record sleeves, a shelf of artists, the ones you have kept, and the queue.
+      A record with no sleeve of its own wears the same mark this application
+      does, at whatever size it is drawn.
+    </p>
+    <p>
+      Pressing a song grows its sleeve out of the row it was on into a Now
+      Playing page that fills the window: the artwork as large as the screen
+      will allow, the song, the artist, the album it came from, how far through
+      it is, and what is coming after it. Back shrinks that page into the row it
+      came from, and the music keeps playing while you go on browsing.
+    </p>
+    <p>
+      The transport is the same row of controls on both screens, so shuffle,
+      repeat, skipping, seeking and the volume are always in the same place; the
+      row along the bottom of the library is both what is playing and how to
+      control it.
+    </p>
+    <p>It is an ordinary Wayland application and runs on any desktop.</p>
+
+    <p xml:lang="de">Musik ist eine Sammlung und ein Player im Erscheinungsbild von LineXinBar, bedient mit Controller, Tastatur und Maus.</p>
+    <p xml:lang="de">Ihre Titel werden aus den Ordnern gelesen, die Sie angeben, und auf fünf Arten gezeigt: nach Namen, als Wand aus Plattenhüllen, nach Interpreten, als Favoriten und als Warteschlange.</p>
+    <p xml:lang="de">Ein Titel öffnet sich aus seiner eigenen Hülle zu einer ganzseitigen Ansicht und schrumpft wieder in sie hinein. Die Musik läuft weiter, während Sie stöbern.</p>
+    <p xml:lang="es">Música es una colección y un reproductor con el aspecto de LineXinBar, manejado con mando, teclado y ratón.</p>
+    <p xml:lang="es">Sus canciones se leen de las carpetas que indique y se muestran de cinco formas: por título, como un muro de portadas, por artista, como favoritas y como cola.</p>
+    <p xml:lang="es">Una canción se abre desde su propia portada hasta ocupar toda la ventana, y vuelve a encogerse en ella. La música sigue sonando mientras usted explora.</p>
+    <p xml:lang="fr">Musique est une bibliothèque et un lecteur à l'aspect de LineXinBar, piloté à la manette, au clavier et à la souris.</p>
+    <p xml:lang="fr">Vos morceaux sont lus depuis les dossiers que vous indiquez et présentés de cinq façons : par titre, en mur de pochettes, par artiste, en favoris et en file d'attente.</p>
+    <p xml:lang="fr">Un morceau s'ouvre depuis sa propre pochette pour remplir la fenêtre, puis y revient. La musique continue pendant que vous parcourez.</p>
+    <p xml:lang="hi">संगीत, LineXinBar की शैली में बनी एक लाइब्रेरी और प्लेयर है, जिसे कंट्रोलर, कीबोर्ड और माउस से चलाया जा सकता है।</p>
+    <p xml:lang="hi">आपके गाने उन फ़ोल्डरों से पढ़े जाते हैं जो आप बताते हैं, और पाँच तरह से दिखाए जाते हैं: नाम से, एलबम की दीवार, कलाकार, पसंदीदा और कतार।</p>
+    <p xml:lang="hi">कोई गाना अपने ही एलबम कवर से खुलकर पूरी खिड़की भर देता है और फिर उसी में लौट जाता है। आप देखते रहें, संगीत बजता रहता है।</p>
+    <p xml:lang="pl">Muzyka to biblioteka i odtwarzacz utrzymany w stylu LineXinBar, obsługiwany kontrolerem, klawiaturą i myszą.</p>
+    <p xml:lang="pl">Utwory są wczytywane z folderów, które wskażesz, i pokazywane na pięć sposobów: według tytułu, jako ściana okładek, według wykonawcy, jako ulubione i jako kolejka.</p>
+    <p xml:lang="pl">Utwór otwiera się ze swojej własnej okładki na całe okno i wraca do niej z powrotem. Muzyka gra dalej, kiedy przeglądasz.</p>
+    <p xml:lang="pt_BR">Músicas é uma coleção e um reprodutor com a aparência do LineXinBar, controlado por controle, teclado e mouse.</p>
+    <p xml:lang="pt_BR">Suas músicas são lidas das pastas que você indicar e mostradas de cinco formas: por título, como uma parede de capas, por artista, como favoritas e como fila.</p>
+    <p xml:lang="pt_BR">Uma música se abre a partir da própria capa até preencher a janela, e volta a encolher para ela. A música continua tocando enquanto você navega.</p>
+    <p xml:lang="ru">Музыка — это коллекция и проигрыватель в оформлении LineXinBar, управляемые контроллером, клавиатурой и мышью.</p>
+    <p xml:lang="ru">Композиции читаются из папок, которые вы укажете, и показываются пятью способами: по названию, стеной обложек, по исполнителям, избранное и очередь.</p>
+    <p xml:lang="ru">Композиция раскрывается из своей же обложки на всё окно и сворачивается обратно в неё. Музыка продолжает играть, пока вы смотрите коллекцию.</p>
+    <p xml:lang="zh_CN">音乐是一款采用 LineXinBar 设计语言的音乐库与播放程序，可用手柄、键盘和鼠标操作。</p>
+    <p xml:lang="zh_CN">您的歌曲从您指定的文件夹中读取，并以五种方式呈现：按名称、专辑封面墙、按艺人、收藏和队列。</p>
+    <p xml:lang="zh_CN">一首歌会从自己的专辑封面展开为整个窗口，再收回到那张封面里。您继续浏览时，音乐不会中断。</p>
+  </description>
+
+  <launchable type="desktop-id">songonsole.desktop</launchable>
+  <provides>
+    <binary>songonsole</binary>
+  </provides>
+
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Player</category>
+    <category>Music</category>
+  </categories>
+
+  <supports>
+    <control>gamepad</control>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </supports>
+
+  <developer id="io.github.petexy">
+    <name>Piotr Lewandowski</name>
+  </developer>
+
+  <url type="homepage">https://github.com/Petexy/songonsole</url>
+  <url type="bugtracker">https://github.com/Petexy/songonsole/issues</url>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.9.0" type="development" date="2026-09-18">
+      <description>
+        <p>The first release. A library of music, and one song at a time.</p>
+        <p>
+          This release shares its version with LineXinBar, lxb-toolkit,
+          Imagonsole, Videonsole, DistriBumpy and CEDM.
+        </p>
+      </description>
+    </release>
+  </releases>
+  <languages>
+    <lang percentage="100">en</lang>
+    <lang percentage="100">de</lang>
+    <lang percentage="100">es</lang>
+    <lang percentage="100">fr</lang>
+    <lang percentage="100">hi</lang>
+    <lang percentage="100">pl</lang>
+    <lang percentage="100">pt_BR</lang>
+    <lang percentage="100">ru</lang>
+    <lang percentage="100">zh_CN</lang>
+  </languages>
+</component>

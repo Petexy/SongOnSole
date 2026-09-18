@@ -1,0 +1,50 @@
+<svg data-lxb-material="lxb:shape" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!--
+    Songonsole: a record sleeve with a pair of beamed notes cut through it.
+
+    Drawn in the shell's own glyph language rather than as a badge with a
+    background — the same 32-unit field, the same bead-and-holes construction,
+    and the same one colour. See LineXinBar's glyph sources, where the language
+    is set out: a glyph is one white body, and everything inside it is an
+    opening cut through that body rather than a mark laid on top.
+
+    The notes are the toolkit's own `category-music`, to the unit, moved and
+    scaled about their own middle so that this application's mark stands in the
+    same family as the shelf it is reached from. What tells the two apart is
+    what is around them: the category is the notes and nothing else, and this is
+    the notes inside a sleeve — because a category is a kind of file and an
+    application is something that does something to one. It is also exactly
+    what the program draws for a record whose sleeve nobody supplied, at 44
+    pixels in a list and at 440 on the Now Playing page.
+
+    The sleeve's corner is the card radius the rest of this application rounds
+    its sleeves by, read as a share of 32 rather than copied as a number.
+  -->
+  <defs>
+    <rect id="sleeve" x="2.4" y="2.4" width="27.2" height="27.2" rx="4.2"/>
+
+    <!-- `category-music`, unchanged. Its own middle is (15.78, 17.11) and its
+         own extent 21.95 by 22.88, which is what the transform below is
+         written against: scaled to seven tenths it leaves rather less than a
+         sixth of the sleeve as a frame on every side. -->
+    <g id="notes" transform="translate(16 16.4) scale(0.7) translate(-15.78 -17.11)">
+      <path d="M12.54 11.72L25.24 9.32L25.84 9.09L26.33 8.67L26.65 8.11L26.75 7.48L26.63 6.85L26.30 6.29L25.81 5.89L25.20 5.67L24.56 5.68L11.86 8.08L11.26 8.31L10.77 8.73L10.45 9.29L10.35 9.92L10.47 10.55L10.80 11.11L11.29 11.51L11.90 11.73Z"/>
+      <path d="M11.00 9.90L11.00 23.40L11.07 23.81L11.28 24.17L11.60 24.44L11.99 24.58L12.41 24.58L12.80 24.44L13.12 24.17L13.33 23.81L13.40 23.40L13.40 9.90L13.33 9.49L13.12 9.13L12.80 8.86L12.41 8.72L11.99 8.72L11.60 8.86L11.28 9.13L11.07 9.49Z"/>
+      <path d="M23.70 7.50L23.70 20.60L23.77 21.01L23.98 21.37L24.30 21.64L24.69 21.78L25.11 21.78L25.50 21.64L25.82 21.37L26.03 21.01L26.10 20.60L26.10 7.50L26.03 7.09L25.82 6.73L25.50 6.46L25.11 6.32L24.69 6.32L24.30 6.46L23.98 6.73L23.77 7.09Z"/>
+      <ellipse cx="9.3" cy="24.6" rx="4.7" ry="3.7" transform="rotate(-20 9.3 24.6)"/>
+      <ellipse cx="22.0" cy="21.8" rx="4.7" ry="3.7" transform="rotate(-20 22.0 21.8)"/>
+    </g>
+
+    <g id="bead"><use href="#sleeve"/></g>
+    <g id="holes"><use href="#notes" fill="#000000"/></g>
+
+    <mask id="pierced">
+      <use href="#bead" fill="#ffffff"/>
+      <use href="#holes"/>
+    </mask>
+  </defs>
+
+  <g mask="url(#pierced)">
+    <use href="#bead" fill="#ffffff"/>
+  </g>
+</svg>

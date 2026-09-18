@@ -1,0 +1,37 @@
+Package: songonsole
+Version: @VERSION@-1
+Architecture: @ARCH@
+Maintainer: Piotr Lewandowski <piotr.petexy@gmail.com>
+Section: sound
+Priority: optional
+Depends: @SHLIB_DEPENDS@, libxkbcommon0, libegl1, ffmpeg
+Recommends: xdg-desktop-portal
+Suggests: libvulkan1
+Installed-Size: @INSTALLED_SIZE@
+Homepage: https://github.com/Petexy/songonsole
+Description: a music library and player in the LineXinBar design language
+ Shown as Music. Your songs, gathered from the folders you name, read for their
+ tags and their artwork and laid out as a list of songs, a wall of record
+ sleeves, a shelf of artists, your favourites and the queue.
+ .
+ Pressing a song grows its sleeve out of the row it was on into a Now Playing
+ page that fills the window: the artwork as large as the screen will allow, the
+ song, the artist, the album it came from, where it has got to, and what is
+ coming after it. Back shrinks the page into the row it came from and the music
+ keeps playing while you go on browsing.
+ .
+ The transport is the same row of controls on both screens, so shuffle, repeat,
+ skipping, seeking and the volume are always in the same place, and the row
+ along the bottom of the library is both what is playing and how to control it.
+ .
+ It is an ordinary Wayland application, drawn in the LineXinBar design language
+ and driven from a controller, a keyboard and a pointer at once. It runs under
+ GNOME or Plasma as readily as under the shell it was made for.
+ .
+ libxkbcommon0 and libegl1 are named here because they are opened by name at
+ run time rather than linked, so nothing that reads the executable can find
+ them. ffmpeg is named because ffprobe reads every file's tags and its length
+ and ffmpeg lifts out its artwork — they are run as programs rather than linked,
+ so nothing that reads the executable finds those either, and without them the
+ library stays empty. libvulkan1 is only suggested: with a Vulkan driver present
+ this draws through it, and without one it falls back to EGL.

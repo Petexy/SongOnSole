@@ -1,0 +1,57 @@
+[package]
+name = "songonsole"
+version = "0.9.0"
+edition = "2021"
+rust-version = "1.87"
+license = "GPL-3.0-only"
+description = "A music library and player in the LineXinBar design language, shown as Music"
+repository = "https://github.com/Petexy/songonsole"
+
+[workspace]
+
+[dependencies]
+# The window, the frame loop, the controls and the sounds. Unlike its two
+# siblings this application does **not** draw its own window, and the reason is
+# a number: `Ui::picture` reads a file into a 512-pixel cell of a shared atlas,
+# which is short for a photograph filling a 4K screen and ample for a record
+# sleeve — the largest one ever drawn here is the Now Playing page's, and a
+# sleeve is square, so 512 is more than the pixels it is given. Nothing this
+# program shows needs a pass of its own, so it takes the ordinary window and
+# every page can be drawn over by a menu, a dialog and the file question.
+lxb-app = { version = "0.9.0", path = "/usr/share/lxb-toolkit/crates/lxb-app" }
+
+# The design language itself: colour, material, motion, type, metrics, marks
+# and what a control means — the words the file question says among them. Every
+# value this application draws is asked of it by name.
+lxb-toolkit = { version = "0.9.0", path = "/usr/share/lxb-toolkit/crates/lxb-toolkit" }
+
+# The renderer that answers those names with the real material. Named directly
+# for what a page crossing needs and `lxb-app` does not wrap: `Ui::written`,
+# `Ui::cut_between` and `Ui::fade_between`, which are how one page grows out of
+# the card that was pressed, and `Ui::recede`, which is how the page behind it
+# steps back.
+lxb-render = { version = "0.9.0", path = "/usr/share/lxb-toolkit/crates/lxb-render" }
+
+# Playing the sound. Symphonia reads every format the library walk will admit,
+# and `playback` is the one device this program opens.
+rodio = { version = "0.22", default-features = false, features = [
+    "playback",
+    "symphonia-all",
+] }
+
+# How far the stick is pushed, which is the one thing `lxb-input` does not
+# answer: it turns a stick into Left and Right at a fixed cadence, which is
+# right for walking a list and wrong for setting a bar. The film player and the
+# photo viewer each open one of these for their own analogue control, at this
+# same version. See `src/pad.rs`.
+gilrs = "0.11.2"
+
+# Reading what `ffprobe` says about a file, and remembering the folders
+# somebody added.
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
