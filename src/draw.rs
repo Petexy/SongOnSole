@@ -7,7 +7,7 @@
 use crate::{
     app::{
         entry, Card, Change, Music, Row, Screen, Zone, BAR_LOUDNESS, BAR_POSITION, FIRST_BUTTON,
-        NOW_PLAYING, RAIL_ADD_FOLDER, RAIL_OPTIONS, TABS, TRANSPORT,
+        NOW_PLAYING, RAIL_ADD_FOLDER, TABS, TRANSPORT,
     },
     i18n,
     legend::{self, hint, Button, Hint},
@@ -33,16 +33,15 @@ use lxb_toolkit::{
 pub const TAB: u32 = 100;
 pub const CONTROL: u32 = 200;
 pub const ADD_FOLDER: u32 = 300;
-pub const OPTIONS: u32 = 301;
-pub const HEADING: u32 = 302;
-pub const STRIP: u32 = 303;
-pub const VOLUME: u32 = 304;
-pub const POSITION: u32 = 305;
+pub const HEADING: u32 = 301;
+pub const STRIP: u32 = 302;
+pub const VOLUME: u32 = 303;
+pub const POSITION: u32 = 304;
 /// The big button standing where the songs would be when there are none. It is
 /// not the rail's own Add a folder and must not be numbered as one: two spots
 /// sharing a number are two controls that cannot both be pressed, and a press
 /// on this one would have sent the light off to the rail.
-pub const ADD_FOLDER_HERE: u32 = 306;
+pub const ADD_FOLDER_HERE: u32 = 305;
 pub const QUEUED: u32 = 400;
 pub const ROW: u32 = 1000;
 
@@ -85,7 +84,6 @@ pub fn hints(state: &Music) -> Vec<Hint> {
         (Screen::Playing, _) => transport_label(state, state.transport),
         (_, Zone::Sidebar) => match state.rail {
             RAIL_ADD_FOLDER => i18n::text("add-folder"),
-            RAIL_OPTIONS => i18n::text("options"),
             _ => i18n::text("open"),
         },
         (_, Zone::Transport) => transport_label(state, state.transport),
@@ -672,18 +670,17 @@ fn tab_at(at: [f32; 4], s: f32, since: f32, index: usize) -> [f32; 4] {
     ]
 }
 
-/// Where a row of the rail goes: the five shelves, and then the two buttons
+/// Where a row of the rail goes: the five shelves, and then the button
 /// standing at the foot of it.
 ///
-/// One sum for all seven, because all seven are rows the light walks down and
-/// the light has to be told where each of them is before the page is drawn.
+/// One sum for all six, because all six are rows the light walks down and the
+/// light has to be told where each of them is before the page is drawn.
 fn rail_at(at: [f32; 4], s: f32, since: f32, bottom: f32, row: usize) -> [f32; 4] {
     if row < TABS.len() {
         return tab_at(at, s, since, row);
     }
     let [ox, ..] = at;
-    let up = if row == RAIL_ADD_FOLDER { 112.0 } else { 60.0 };
-    [ox + 36.0 * s, bottom - up * s, 160.0 * s, 44.0 * s]
+    [ox + 36.0 * s, bottom - 60.0 * s, 160.0 * s, 44.0 * s]
 }
 
 /// How tall a row of the list is and how many of them the browser holds.
@@ -944,8 +941,8 @@ fn light_on(
         Zone::Sidebar => {
             let row = state.rail;
             let rect = rail_at(at, s, state.seconds - state.opened, body[1] + body[3], row);
-            // A shelf is a card; the two buttons at the foot are chips, which
-            // is what `Ui::button` cuts them from.
+            // A shelf is a card; the button at the foot is a chip, which is
+            // what `Ui::button` cuts it from.
             Some((
                 rect,
                 if row < TABS.len() {
@@ -1253,25 +1250,14 @@ fn rail(state: &Music, ui: &mut Ui, paint: Paint, at: [f32; 4], bottom: f32) {
             ui.spot(TAB + index as u32, rect);
         }
     }
-    // The two buttons at the foot of the rail are rows of it, so they light
-    // like every other row does — off `state.rail`, not off a pointer being
-    // over them.
-    let on = |row: usize| live && state.zone == Zone::Sidebar && state.rail == row;
+    // The button at the foot of the rail is a row of it, so it lights like
+    // every other row does — off `state.rail`, not off a pointer being over
+    // it.
+    let on = live && state.zone == Zone::Sidebar && state.rail == RAIL_ADD_FOLDER;
     let add = rail_at(at, s, since, bottom, RAIL_ADD_FOLDER);
-    ui.button(
-        add,
-        i18n::text("add-folder-short"),
-        press(state, on(RAIL_ADD_FOLDER)),
-    );
-    let options = rail_at(at, s, since, bottom, RAIL_OPTIONS);
-    ui.button(
-        options,
-        i18n::text("options"),
-        press(state, on(RAIL_OPTIONS)),
-    );
+    ui.button(add, i18n::text("add-folder-short"), press(state, on));
     if live {
         ui.spot(ADD_FOLDER, add);
-        ui.spot(OPTIONS, options);
     }
 }
 
@@ -1809,9 +1795,7 @@ mod tests {
     /// happens to be in the library.
     #[test]
     fn no_control_number_can_reach_the_legends_own() {
-        for base in [
-            TAB, CONTROL, ADD_FOLDER, OPTIONS, HEADING, STRIP, QUEUED, ROW,
-        ] {
+        for base in [TAB, CONTROL, ADD_FOLDER, HEADING, STRIP, QUEUED, ROW] {
             assert!(base < legend::SPOT);
         }
         // A page draws what fits on it, so the highest row it can number is

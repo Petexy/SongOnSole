@@ -39,6 +39,11 @@ this machine, against the installed **lxb-toolkit 0.9.0** at
   match, so that adding one would not compile — that no row of the menu closes
   the application.
 
+  One more when the rail's Options row went: that no row of the rail leaves the
+  legend offering the menu, asked of `draw::hints` on every row of it. The menu
+  is raised by the button the legend names and nothing else, and a rail row
+  that raised it too was a second way to press a button already on screen.
+
   Two more when sorting became a row of its own: that no order is left loose in
   the Options menu and that the row named for sorting is the one that opens
   them, and that neither menu has to be scrolled in the window this application
@@ -71,9 +76,12 @@ this machine, against the installed **lxb-toolkit 0.9.0** at
   `Cargo.lock`, the spec and the AppStream release list; the toolkit requirement
   in every recipe; the three names this application answers to; the staged
   payload; `desktop-file-validate`; `appstreamcli validate`.
-* `make install PREFIX=/usr DESTDIR=…` into a scratch directory, and the six
-  files it stages.
-* Headless renders through the real renderer at 1280×800, 960×600 and 640×400:
+* `packaging/install.sh --destdir … --prefix /usr` into a scratch directory,
+  and the files it stages. (There was a `Makefile` wrapping this; it is gone,
+  because none of the three sibling applications had one and a second way to
+  install is a second thing to keep agreeing with the first.)
+* Headless renders through the real renderer at 1600×900, 1280×800, 960×600
+  and 640×400:
   Songs, Albums, an album's track list, the Now Playing page, and the crossing
   caught 0.16 s in.
 * **Every window size this application accepts, walked.** Two tests step
@@ -113,13 +121,15 @@ this machine, against the installed **lxb-toolkit 0.9.0** at
 * **The whole map, read as one.** A throwaway test walked every direction from
   every zone on both screens and printed where the light went, so that the
   model could be read rather than reasoned about. That is what said the strip
-  was being handed the light at whatever row it was last on, that the two
-  buttons at the foot of the rail could not be reached at all, and that Right
-  off the last record on the wall fell into the transport.
-* The light on each of the rail's last three rows — the Queue shelf, Add a
-  folder and Options — photographed, with the legend under them: the two
-  buttons light as chips and the shelf keeps its own card while the light
-  stands on them.
+  was being handed the light at whatever row it was last on, that the buttons
+  at the foot of the rail could not be reached at all, and that Right off the
+  last record on the wall fell into the transport.
+* The light on each of the rail's last two rows — the Queue shelf and Add a
+  folder — photographed, with the legend under them: the button lights as a
+  chip and the shelf keeps its own card while the light stands on it. Taken
+  again when the Options row went and Add a folder came down into its place,
+  because the highlight and the chip are two readings of one sum and a row
+  that moves is where they would drift apart.
 * **The order the shelves come out in**, photographed at three of the six with
   a scratch build that sets one before the first frame: by artist, newest
   first, and backwards. The pictures also show the listing scrolled to keep the
@@ -226,7 +236,8 @@ exactly this reason.
 
 **Both menus were photographed all the same**, on the private rootful Xwayland
 above: a right click raised Options, which came out seven rows with no arrow at
-its foot; Enter on Sort by raised the orders, out of the same anchor and titled
+its foot — a right click, because a right click and Y are now the only ways to
+raise it; Enter on Sort by raised the orders, out of the same anchor and titled
 for themselves, with Name ticked; and four presses down and Enter put the shelf
 in newest-first order with the light still on the song it was on. A second menu
 raised from inside `Page::chose` is accepted because the toolkit closes the
@@ -254,46 +265,18 @@ first one on the frame the row is taken, so `menu_marked` no longer refuses.
 
 ## About the preview pictures
 
-All but two of `docs/*.png` are `--demo` renders. The library in them is made
-up, plainly labelled *PREVIEW · a made-up library*, and has no audio behind it.
-The records
-have no sleeves, which is why every one of them wears the application's own
-mark: that is what the program really draws for a record nobody supplied
-artwork for.
+`docs/*.png` are `--demo` renders at the Indigo accent, except `options.png`
+and `sorting.png`, which are captures of the real binary on a private rootful
+Xwayland — a menu cannot be photographed with `--shot` here, because it is
+raised on the last of two frames at one instant and never given one to arrive
+in. Nothing in either route touches the user's own session.
 
-They are rendered at the **Indigo** accent, which is not this machine's — the
-accent is the one setting a picture of the interface cannot help stating, and
-five pictures taken on five different days in five different colours would read
-as five different programs. Regenerate them with a scratch settings file rather
-than by changing anybody's desktop:
+The commands that make each one are in [`design.md`](design.md), under *Where
+the pictures come from*, along with why the accent is pinned.
 
-```
-mkdir -p /tmp/lxb-shot/lxb
-printf 'accent = "Indigo"\n' > /tmp/lxb-shot/lxb/shell.toml
-export XDG_CONFIG_HOME=/tmp/lxb-shot
-songonsole --demo --shot docs/library.png  --size 1280x800
-songonsole --demo --shot docs/albums.png   --size 1280x800 --view albums
-songonsole --demo --shot docs/handheld.png --size  960x600 --view albums
-songonsole --demo --shot docs/playing.png  --size 1280x800 --playing
-songonsole --demo --shot docs/opening.png  --size 1280x800 --playing --after 0.16
-```
-
-`--demo` also pins the song's position at 68 seconds, so that a preview picture
-is the same picture every time. That is the one thing about a seek a picture of
+`--demo` pins the song's position at 68 seconds, so that a preview picture is
+the same picture every time. That is the one thing about a seek a picture of
 this application cannot be used to check.
-
-**`docs/options.png` and `docs/sorting.png` are the two exceptions**, because a
-menu cannot be photographed with `--shot` — it is raised on the last of two
-frames at one instant and never given one to arrive in. They are captures of
-the real binary on a private rootful Xwayland, at the same size and the same
-Indigo accent as the rest, and nothing touched the user's own session:
-
-```
-WAYLAND_DISPLAY=wayland-0 Xwayland :7 -geometry 1400x900 -noreset &
-XDG_CONFIG_HOME=/tmp/lxb-shot DISPLAY=:7 WAYLAND_DISPLAY= songonsole --demo &
-# right-click a row for Options, then Enter on Sort by, and
-# import -display :7 -window <id> docs/options.png
-```
 
 ## Known, and left alone
 

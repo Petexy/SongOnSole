@@ -28,16 +28,22 @@ use std::{collections::BTreeMap, path::PathBuf, sync::mpsc};
 pub const TABS: [&str; 5] = ["songs", "albums", "artists", "favourites", "queue"];
 
 /// What the rail down the left-hand side carries, in the order a direction
-/// walks it: the five shelves, and then the two buttons at the foot of it.
+/// walks it: the five shelves, and then the one button at the foot of it.
 ///
-/// **The two buttons are rows of the rail, not decoration on it.** They were
-/// drawn there and numbered for a pointer and nothing else, so on a machine
-/// with a controller and no mouse there was no way to press either of them —
-/// which is the same fault the record at the head of the strip had, in the
-/// same place, for the same reason.
+/// **The button is a row of the rail, not decoration on it.** It was drawn
+/// there and numbered for a pointer and nothing else, so on a machine with a
+/// controller and no mouse there was no way to press it — which is the same
+/// fault the record at the head of the strip had, in the same place, for the
+/// same reason.
+///
+/// **There was a second button here, and it said Options.** It opened the
+/// menu Y opens, that a right click opens, and that F10 and Menu open — and
+/// the legend across the foot of every screen has named the button for it all
+/// along. A row that is a second way to press a button the legend is already
+/// pointing at is a row that makes the rail longer and tells nobody anything.
+/// It was here until 2026-09-22.
 pub const RAIL_ADD_FOLDER: usize = TABS.len();
-pub const RAIL_OPTIONS: usize = TABS.len() + 1;
-pub const RAIL_ROWS: usize = TABS.len() + 2;
+pub const RAIL_ROWS: usize = TABS.len() + 1;
 
 /// What the transport carries, in the order a direction walks it: the two
 /// bars, and then the five buttons.
@@ -1584,12 +1590,6 @@ impl Music {
             self.zone = Zone::Library;
             page.pick(PickerSelection::Folder, crate::settings::music_folder());
         }
-        if page.pressed(crate::draw::OPTIONS) {
-            self.taking_a_press(page);
-            self.zone = Zone::Sidebar;
-            self.rail = RAIL_OPTIONS;
-            self.open_menu(page);
-        }
         if page.pressed(crate::draw::HEADING) {
             self.taking_a_press(page);
             self.leave_group();
@@ -1731,13 +1731,12 @@ impl Music {
                             self.activate();
                         }
                     }
-                    // A shelf opens the browser on it; the two buttons at the
-                    // foot of the rail do what they say.
+                    // A shelf opens the browser on it; the button at the
+                    // foot of the rail does what it says.
                     (Screen::Library, Zone::Sidebar) => match self.rail {
                         RAIL_ADD_FOLDER => {
                             page.pick(PickerSelection::Folder, crate::settings::music_folder());
                         }
-                        RAIL_OPTIONS => self.open_menu(page),
                         _ => self.zone = Zone::Library,
                     },
                     (Screen::Playing, Zone::Queue) => {
@@ -1792,8 +1791,8 @@ impl Music {
             return self.navigate_playing(direction);
         }
         match self.zone {
-            // The five shelves, then Add a folder, then Options. Off the foot
-            // of it is the strip; there is nothing to the left of it.
+            // The five shelves, then Add a folder. Off the foot of it is the
+            // strip; there is nothing to the left of it.
             Zone::Sidebar => match direction {
                 Action::Up => {
                     if self.rail > 0 {
@@ -2179,13 +2178,13 @@ mod tests {
         assert!(music.zone == Zone::Library);
     }
 
-    /// The rail is seven rows, not five: the two buttons at the foot of it are
-    /// walked to and pressed like everything else.
+    /// The rail is six rows, not five: the button at the foot of it is walked
+    /// to and pressed like everything else.
     ///
-    /// They were numbered for a pointer and nothing else, so on a machine with
-    /// a controller and no mouse neither of them could be reached at all.
+    /// It was numbered for a pointer and nothing else, so on a machine with a
+    /// controller and no mouse it could not be reached at all.
     #[test]
-    fn the_two_buttons_at_the_foot_of_the_rail_are_rows_of_it() {
+    fn the_button_at_the_foot_of_the_rail_is_a_row_of_it() {
         let mut music = Music::new(None, true, true);
         music.zone = Zone::Sidebar;
         for row in 1..RAIL_ROWS {
@@ -2193,8 +2192,8 @@ mod tests {
             assert_eq!(music.rail, row);
             assert!(music.zone == Zone::Sidebar, "row {row} fell off the rail");
         }
-        assert_eq!(music.rail, RAIL_OPTIONS);
-        // Standing on a button does not change which shelf is open.
+        assert_eq!(music.rail, RAIL_ADD_FOLDER);
+        // Standing on the button does not change which shelf is open.
         assert_eq!(music.tab, TABS.len() - 1);
 
         // And off the foot of the rail is the strip, at the top of it — the
@@ -2207,16 +2206,31 @@ mod tests {
             music.zone == Zone::Sidebar,
             "Up off the strip went somewhere the light did not come from"
         );
-        assert_eq!(music.rail, RAIL_OPTIONS);
+        assert_eq!(music.rail, RAIL_ADD_FOLDER);
 
         // Back up the rail, and the shelf follows the light again the moment
         // it is on one.
         music.navigate(Action::Up);
-        assert_eq!(music.rail, RAIL_ADD_FOLDER);
-        assert_eq!(music.tab, TABS.len() - 1);
-        music.navigate(Action::Up);
         assert_eq!(music.rail, TABS.len() - 1);
         assert_eq!(music.tab, TABS.len() - 1);
+    }
+
+    /// **Nothing on the rail opens the Options menu.** It is raised by the
+    /// button the legend names — Y on a pad, F10, Menu or a right click — and
+    /// a row of the rail that did the same thing was a second way to press a
+    /// button that was already on screen saying what it did.
+    #[test]
+    fn no_row_of_the_rail_opens_the_options_menu() {
+        let mut music = Music::new(None, true, true);
+        music.zone = Zone::Sidebar;
+        for row in 0..RAIL_ROWS {
+            music.stand_on_rail(row);
+            assert_ne!(
+                crate::draw::hints(&music)[0].label,
+                i18n::text("options"),
+                "rail row {row} still offers the menu"
+            );
+        }
     }
 
     /// A direction along a bar moves the bar and nothing else: the light does

@@ -31,6 +31,7 @@ Usage: songonsole [FOLDER|SONG] [OPTIONS]
 
   --shot FILE       write one settled frame to a PNG and stop
   --size WxH        how large that frame is (default 1280x800)
+  --width N, --height N   the same, said the way the other three say it
   --view NAME       open on songs, albums, artists, favourites or queue
   --playing         open the Now Playing page
   --after SECONDS   how long after the press the picture is taken
@@ -110,6 +111,16 @@ fn controllers() {
     }
 }
 
+/// A window this program would really open. The floor is the size the layout
+/// is built down to; the ceiling is there so that a typo cannot ask for a
+/// texture no card will allocate.
+fn bound(size: (u32, u32)) -> Result<(), String> {
+    if size.0 < 640 || size.1 < 400 || size.0 > 7680 || size.1 > 4320 {
+        return Err("Size must be between 640x400 and 7680x4320".into());
+    }
+    Ok(())
+}
+
 fn run() -> Result<(), String> {
     let mut args = std::env::args().skip(1);
     let mut opening = None;
@@ -162,9 +173,26 @@ fn run() -> Result<(), String> {
                     w.parse::<u32>().map_err(|_| "Invalid width")?,
                     h.parse::<u32>().map_err(|_| "Invalid height")?,
                 );
-                if size.0 < 640 || size.1 < 400 || size.0 > 7680 || size.1 > 4320 {
-                    return Err("Size must be between 640x400 and 7680x4320".into());
-                }
+                bound(size)?;
+            }
+            // The two the other three applications take, so that one line in a
+            // README photographs any of them. `--size` stays: it is what every
+            // picture in this repository was taken with.
+            "--width" => {
+                size.0 = args
+                    .next()
+                    .ok_or("--width needs a number")?
+                    .parse::<u32>()
+                    .map_err(|_| "Invalid width")?;
+                bound(size)?;
+            }
+            "--height" => {
+                size.1 = args
+                    .next()
+                    .ok_or("--height needs a number")?
+                    .parse::<u32>()
+                    .map_err(|_| "Invalid height")?;
+                bound(size)?;
             }
             option if option.starts_with('-') => return Err(format!("Unknown option: {option}")),
             path => {
