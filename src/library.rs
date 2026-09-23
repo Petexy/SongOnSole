@@ -395,6 +395,15 @@ mod media_tests {
                     "-metadata",
                     "track=2/8",
                 ])
+                // Matroska's default encoder is whatever the ffmpeg build
+                // prefers: Vorbis from 9.0 on Arch, Opus from Fedora's 8.1,
+                // which the decoder does not read. The container is what is
+                // under test here, so the codec is named.
+                .args(if extension == "mka" {
+                    &["-c:a", "libvorbis"][..]
+                } else {
+                    &[][..]
+                })
                 .arg(&path)
                 .output()
                 .expect("Install FFmpeg to run media integration tests");

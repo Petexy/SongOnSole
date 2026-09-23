@@ -21,8 +21,8 @@ ExclusiveArch:  x86_64 aarch64
 # so the DWARF is built and packaged rather than built and binned.
 %global debug_package %{nil}
 
-BuildRequires:  cargo >= 1.87
-BuildRequires:  rust >= 1.87
+BuildRequires:  cargo >= 1.90
+BuildRequires:  rust >= 1.90
 BuildRequires:  gcc
 BuildRequires:  pkgconfig
 BuildRequires:  desktop-file-utils
@@ -31,14 +31,15 @@ BuildRequires:  libappstream-glib
 # runtime one: `lxb-app` is a path dependency, so cargo compiles it into this
 # binary and the finished program links no liblxb_*.so at all.
 BuildRequires:  lxb-toolkit-devel >= 0.9.0
-# What plays the sound. The one library this application links outright, and
-# asked for as a pkg-config name rather than as a package so that whichever
-# alsa-lib-devel the buildroot has answers for it.
+# What the program links outright, each asked for as a pkg-config name, which
+# is what the Rust bindings look for: ALSA for the interface sounds, libudev
+# for the game controllers and xkbcommon for the keyboard.
 BuildRequires:  pkgconfig(alsa)
+BuildRequires:  pkgconfig(libudev)
+BuildRequires:  pkgconfig(xkbcommon)
 
 # Opened by name at run time rather than linked, so rpm's automatic dependency
-# generator cannot see either of them in the ELF.
-Requires:       libxkbcommon
+# generator cannot see it in the ELF.
 Requires:       libglvnd-egl
 # Choosing another folder is put to whatever chooser this desktop runs, through
 # the portal. Without one the toolkit draws its own, so this is not required.
@@ -53,6 +54,10 @@ Suggests:       vulkan-loader
 # in the main repository and the whole one from RPM Fusion; either answers.
 Requires:       /usr/bin/ffprobe
 Requires:       /usr/bin/ffmpeg
+# And %%check's: the media tests make a tagged file of each supported kind with
+# ffmpeg and read it back through ffprobe, the way the library does.
+BuildRequires:  /usr/bin/ffprobe
+BuildRequires:  /usr/bin/ffmpeg
 
 %description
 Shown as Music. A library and a player drawn in the LineXinBar design language:
