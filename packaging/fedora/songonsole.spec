@@ -1,5 +1,5 @@
 Name:           songonsole
-Version:        0.9.0
+Version:        0.9.1
 Release:        1%{?dist}
 Summary:        A music library and player in the LineXinBar design language, shown as Music
 
@@ -30,7 +30,7 @@ BuildRequires:  libappstream-glib
 # The design language, as Rust sources. It is a build dependency and not a
 # runtime one: `lxb-app` is a path dependency, so cargo compiles it into this
 # binary and the finished program links no liblxb_*.so at all.
-BuildRequires:  lxb-toolkit-devel >= 0.9.0
+BuildRequires:  lxb-toolkit-devel >= 0.9.1
 # What the program links outright, each asked for as a pkg-config name, which
 # is what the Rust bindings look for: ALSA for the interface sounds, libudev
 # for the game controllers and xkbcommon for the keyboard.
@@ -152,6 +152,18 @@ appstream-util validate-relax --nonet \
 %{_metainfodir}/io.github.petexy.songonsole.metainfo.xml
 
 %changelog
+* Thu Sep 24 2026 Piotr Lewandowski <piotr.petexy@gmail.com> - 0.9.1-1
+- Released with LineXinBar 0.9.1. Sorting is one row of the Options menu, with
+  the six orders behind it.
+- The transport lays out its chips and marks at the size the window really is,
+  so two controls no longer share one place in a small window.
+- The rail's Options chip is gone; the legend already names that button.
+- --shot takes --width and --height, as the other three applications do, and
+  the Makefile has given way to a flake at the root, as theirs has.
+- The wallpaper carries the shell's sparkles and follows Theme > Particles,
+  which lxb-app hands every window.
+- Requires lxb-toolkit 0.9.1 to build, the version the family releases under.
+
 * Thu Sep 18 2026 Piotr Lewandowski <piotr.petexy@gmail.com> - 0.9.0-1
 - First packaged release. A music library and one song at a time, in the
   LineXinBar design language.

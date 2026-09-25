@@ -105,6 +105,27 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.9.1" type="development" date="2026-09-24">
+      <description>
+        <p>
+          Sorting is one row of the menu, with the orders behind it.
+        </p>
+        <p>
+          The controls under a song no longer land on top of one
+          another in a small window, and the side list no longer
+          repeats the Options button the bottom of the screen already
+          shows.
+        </p>
+        <p>
+          The background carries the desktop's sparkles, and follows
+          its Particles setting.
+        </p>
+        <p>
+          This release shares its version with LineXinBar,
+          lxb-toolkit, CEDM, Imagonsole, Videonsole and DistriBumpy.
+        </p>
+      </description>
+    </release>
     <release version="0.9.0" type="development" date="2026-09-18">
       <description>
         <p>The first release. A library of music, and one song at a time.</p>

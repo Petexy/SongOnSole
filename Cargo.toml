@@ -1,6 +1,6 @@
 [package]
 name = "songonsole"
-version = "0.9.0"
+version = "0.9.1"
 edition = "2021"
 rust-version = "1.90"
 license = "GPL-3.0-only"
@@ -18,19 +18,19 @@ repository = "https://github.com/Petexy/songonsole"
 # sleeve is square, so 512 is more than the pixels it is given. Nothing this
 # program shows needs a pass of its own, so it takes the ordinary window and
 # every page can be drawn over by a menu, a dialog and the file question.
-lxb-app = { version = "0.9.0", path = "/usr/share/lxb-toolkit/crates/lxb-app" }
+lxb-app = { version = "0.9.1", path = "/usr/share/lxb-toolkit/crates/lxb-app" }
 
 # The design language itself: colour, material, motion, type, metrics, marks
 # and what a control means — the words the file question says among them. Every
 # value this application draws is asked of it by name.
-lxb-toolkit = { version = "0.9.0", path = "/usr/share/lxb-toolkit/crates/lxb-toolkit" }
+lxb-toolkit = { version = "0.9.1", path = "/usr/share/lxb-toolkit/crates/lxb-toolkit" }
 
 # The renderer that answers those names with the real material. Named directly
 # for what a page crossing needs and `lxb-app` does not wrap: `Ui::written`,
 # `Ui::cut_between` and `Ui::fade_between`, which are how one page grows out of
 # the card that was pressed, and `Ui::recede`, which is how the page behind it
 # steps back.
-lxb-render = { version = "0.9.0", path = "/usr/share/lxb-toolkit/crates/lxb-render" }
+lxb-render = { version = "0.9.1", path = "/usr/share/lxb-toolkit/crates/lxb-render" }
 
 # Playing the sound. Symphonia reads every format the library walk will admit,
 # and `playback` is the one device this program opens.
