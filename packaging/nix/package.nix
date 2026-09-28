@@ -11,6 +11,8 @@
   # is the one in the list that the usual RPATH machinery does find for itself
   # — it is in `buildInputs` below and not in `openedAtRuntime`.
   alsa-lib,
+  # gilrs's libudev-sys needs libudev.pc on the pkg-config path in the sandbox.
+  udev,
   # What reads a file's tags, its length and its artwork. Nothing links it:
   # `ffprobe` and `ffmpeg` are run as programs, so this is a *runtime* input and
   # goes on PATH in the wrapper rather than into `buildInputs`.
@@ -65,8 +67,14 @@ rustPlatform.buildRustPackage {
   cargoLock.lockFile = "${cleanSrc}/Cargo.lock";
 
   strictDeps = true;
-  nativeBuildInputs = [ pkg-config makeWrapper ];
-  buildInputs = openedAtRuntime ++ [ alsa-lib ];
+  # ffmpeg is here as well as in the wrapper below: the media integration
+  # tests shell out to ffprobe, and checkPhase runs in a sandbox where the
+  # wrapper does not exist yet.
+  nativeBuildInputs = [ pkg-config makeWrapper ffmpeg ];
+  buildInputs = openedAtRuntime ++ [
+    alsa-lib
+    udev
+  ];
 
   # Cargo.toml names the toolkit's crates at /usr/share, which is where every
   # other distribution here puts them and is nowhere at all under Nix. This is
@@ -87,12 +95,18 @@ rustPlatform.buildRustPackage {
   installPhase = ''
     runHook preInstall
 
-    # install.sh reads the release directory of a target dir; buildRustPackage
-    # builds under a target triple, so point it at the parent of that.
+    # install.sh reads the release directory of a target dir. The cargo hooks
+    # pass --target, so the real artifacts live under the triple dir; cargo
+    # still creates an empty-ish target/release for package/check side
+    # outputs, so detect by the binary's presence rather than by directory
+    # name or glob order.
     targetDir="target"
-    if [ ! -d "target/release" ]; then
-      targetDir="$(dirname "$(dirname "$(readlink -f target/*/release)")")"
-    fi
+    for d in target/*/release target/release; do
+      if [ -e "$d/songonsole" ]; then
+        targetDir="$(dirname "$d")"
+        break
+      fi
+    done
 
     bash packaging/install.sh \
       --destdir "$out" \
