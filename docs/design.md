@@ -77,6 +77,26 @@ up-next list stands above the strip rather than beside it. Left out of the
 queue is the strip as well, because a queue can run to hundreds and pressing
 down through all of them to reach Play is not a way out.
 
+On a window standing on its side there is no room beside the record for its
+words and the queue as well, so the page is one column there: the record
+centred at the top, the four lines about it under it and as wide as it is, and
+what is next under those, down to the strip. The light walks it exactly as it
+walks the page lying down, since the queue was already above the strip.
+
+The library on such a window does what LineXinBar's Home menu does between its
+column and its cards. Everything here is the size the window's height makes it,
+so there is not room for the rail and the list side by side; rather than squeeze
+the list into what is left beside the rail, the rail keeps its width and the
+whole view slides between the two with the light, on the toolkit's
+`layout::beside` and `layout::Slide`. With the light on the rail the rail is
+whole and the list peeks in at the right; with it in the list the list is
+whole, as wide as the window allows, with a strip of the rail at the left. The
+light in the strip leaves the view where it was, since the strip stands under
+both. The strip itself stacks there — the record and its words, then the two
+bars across its width, then the buttons — where side by side the position bar
+would be too short to hold its two clocks apart. A landscape window, or a square
+one, has room for both and is laid out as it always was.
+
 **Nothing in the Options menu closes Music.** Back does, from the rail. And
 nothing on the rail opens the Options menu either: it is raised by the button
 the legend names and nothing else.
@@ -111,6 +131,8 @@ songonsole --demo --shot docs/handheld.png --width  960 --height 600 --view albu
 
 `--width`/`--height` and `--size WxH` are the same thing; the first pair is
 what the other three applications take, so one line photographs any of them.
+`--rail` starts with the light on the rail rather than in the list, which on a
+window standing on its side is the view slid back to the rail.
 
 **`docs/options.png` and `docs/sorting.png` are the two exceptions**, because a
 menu cannot be photographed with `--shot` here — it is raised on the last of

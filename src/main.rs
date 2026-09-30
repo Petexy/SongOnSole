@@ -36,6 +36,7 @@ Usage: songonsole [FOLDER|SONG] [OPTIONS]
   --playing         open the Now Playing page
   --after SECONDS   how long after the press the picture is taken
   --back            press Back rather than opening, so the way out can be seen
+  --rail            start with the light on the rail rather than in the list
   --demo            a made-up library, for pictures; nothing of yours is touched
   --controllers     list what this machine can be driven with
   --version         print the version
@@ -130,6 +131,7 @@ fn run() -> Result<(), String> {
     let mut size = (1280, 800);
     let mut playing = false;
     let mut back = false;
+    let mut rail = false;
     let mut after: Option<f32> = None;
     while let Some(arg) = args.next() {
         match arg.as_str() {
@@ -149,6 +151,7 @@ fn run() -> Result<(), String> {
             "--demo" => demo = true,
             "--playing" => playing = true,
             "--back" => back = true,
+            "--rail" => rail = true,
             "--after" => {
                 let value = args.next().ok_or("--after needs a number of seconds")?;
                 let seconds: f32 = value.parse().map_err(|_| "--after needs a number")?;
@@ -223,6 +226,11 @@ fn run() -> Result<(), String> {
     if let Some(path) = shot {
         state.finish_scan();
         state.change_tab(view);
+        // The light on the rail from the first frame, which on a window
+        // standing on its side is the view slid back to the rail.
+        if rail {
+            state.zone = app::Zone::Sidebar;
+        }
         // A press has to wait until a page has been laid out: only drawing
         // knows where the cards went, and a page grows out of a rectangle. A
         // shot with no `--after` is a picture of a page that has arrived, so

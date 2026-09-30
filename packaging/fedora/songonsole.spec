@@ -1,5 +1,5 @@
 Name:           songonsole
-Version:        0.9.2
+Version:        0.9.3
 Release:        1%{?dist}
 Summary:        A music library and player in the LineXinBar design language, shown as Music
 
@@ -30,7 +30,7 @@ BuildRequires:  libappstream-glib
 # The design language, as Rust sources. It is a build dependency and not a
 # runtime one: `lxb-app` is a path dependency, so cargo compiles it into this
 # binary and the finished program links no liblxb_*.so at all.
-BuildRequires:  lxb-toolkit-devel >= 0.9.2
+BuildRequires:  lxb-toolkit-devel >= 0.9.3
 # What the program links outright, each asked for as a pkg-config name, which
 # is what the Rust bindings look for: ALSA for the interface sounds, libudev
 # for the game controllers and xkbcommon for the keyboard.
@@ -152,6 +152,15 @@ appstream-util validate-relax --nonet \
 %{_metainfodir}/io.github.petexy.songonsole.metainfo.xml
 
 %changelog
+* Tue Sep 29 2026 Piotr Lewandowski <piotr.petexy@gmail.com> - 0.9.3-1
+- Released with LineXinBar 0.9.3. A song playing keeps the machine awake
+  (never the screen) through lxb-app's keep_awake, which also asks the portal
+  from inside a Flatpak; zbus is no longer a dependency.
+- Follows low-end hardware mode, asking for a frame four times a second while
+  a song plays so the next one starts on time, and opens on a machine without
+  a Vulkan driver through OpenGL.
+- Requires lxb-toolkit 0.9.3 to build.
+
 * Sun Sep 27 2026 Piotr Lewandowski <piotr.petexy@gmail.com> - 0.9.2-1
 - Released with LineXinBar 0.9.2. A controller that is switched off and on
   again is read again: the stick it moves a bar with, and every other control,

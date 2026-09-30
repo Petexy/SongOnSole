@@ -11,7 +11,8 @@
   # is the one in the list that the usual RPATH machinery does find for itself
   # — it is in `buildInputs` below and not in `openedAtRuntime`.
   alsa-lib,
-  # gilrs's libudev-sys needs libudev.pc on the pkg-config path in the sandbox.
+  # How the controllers are found: the toolkit's GilRs fork reaches libudev
+  # through libudev-sys, whose build script asks pkg-config for it.
   udev,
   # What reads a file's tags, its length and its artwork. Nothing links it:
   # `ffprobe` and `ffmpeg` are run as programs, so this is a *runtime* input and
@@ -67,10 +68,11 @@ rustPlatform.buildRustPackage {
   cargoLock.lockFile = "${cleanSrc}/Cargo.lock";
 
   strictDeps = true;
-  # ffmpeg is here as well as in the wrapper below: the media integration
-  # tests shell out to ffprobe, and checkPhase runs in a sandbox where the
-  # wrapper does not exist yet.
-  nativeBuildInputs = [ pkg-config makeWrapper ffmpeg ];
+  nativeBuildInputs = [ pkg-config makeWrapper ];
+  # ffmpeg is here as well as in the wrapper below: the media test makes its
+  # files with ffmpeg and reads them back with ffprobe, and it runs before the
+  # wrapper exists. It is needed to check the program, not to build it.
+  nativeCheckInputs = [ ffmpeg ];
   buildInputs = openedAtRuntime ++ [
     alsa-lib
     udev
@@ -96,10 +98,10 @@ rustPlatform.buildRustPackage {
     runHook preInstall
 
     # install.sh reads the release directory of a target dir. The cargo hooks
-    # pass --target, so the real artifacts live under the triple dir; cargo
-    # still creates an empty-ish target/release for package/check side
-    # outputs, so detect by the binary's presence rather than by directory
-    # name or glob order.
+    # build with --target, so the binary is in target/<triple>/release;
+    # target/release exists as well, holding the build scripts cargo ran for
+    # the host, so the target dir is whichever one the binary is in rather
+    # than whichever one exists.
     targetDir="target"
     for d in target/*/release target/release; do
       if [ -e "$d/songonsole" ]; then

@@ -371,7 +371,14 @@ pub struct Music {
     /// function of `seconds` and needs no such thing; a drive is the one part
     /// of this application that accumulates, and a rate is only a distance
     /// once it has been given a time.
-    dt: f32,
+    pub(crate) dt: f32,
+    /// Which half of a window too narrow for the rail and the browser side by
+    /// side the view stands on: the browser once the light has gone into it,
+    /// the rail once it has come back, and whichever it was while the light is
+    /// down in the strip, which stands under both. See `draw::browser_beside`.
+    pub facing_browser: bool,
+    /// The view's slide between the two. See `lxb_toolkit::layout::Slide`.
+    pub slide: lxb_toolkit::layout::Slide,
     /// When the page now showing arrived, which is what the rows come in one
     /// after another from.
     pub arrived: f32,
@@ -482,6 +489,8 @@ impl Music {
             visible_rows: 7,
             columns: 1,
             seconds: 0.0,
+            facing_browser: false,
+            slide: lxb_toolkit::layout::Slide::default(),
             dt: 0.0,
             arrived: 0.0,
             opened: 0.0,
@@ -1476,6 +1485,21 @@ impl Music {
             self.rebuild();
         }
         self.audio.poll();
+        // Somebody listening is somebody using the machine, however long they
+        // go without touching it — the machine, not the screen, which may go
+        // dark over a song. The toolkit asks the desktop only when it changes.
+        let playing = self.audio.status.playing;
+        page.keep_awake(if playing {
+            lxb_app::Hold::SLEEP
+        } else {
+            lxb_app::Hold::NOTHING
+        });
+        // And a song is something running that only this frame notices ending:
+        // in low-end hardware mode, where a still window is drawn once a
+        // second, the next one should not wait that long to start.
+        if playing {
+            page.redraw_within(std::time::Duration::from_millis(250));
+        }
         if self.audio.status.ended && !self.ended_handled {
             self.ended_handled = true;
             if self.queue.next(true).is_some() {

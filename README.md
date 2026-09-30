@@ -4,7 +4,7 @@
 driven by a controller. It is shown as *Music*.**
 
 [![Licence](https://img.shields.io/badge/licence-GPL--3.0--only-blue)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.9.2-informational)](VERSION)
+[![Version](https://img.shields.io/badge/version-0.9.3-informational)](VERSION)
 [![Rust](https://img.shields.io/badge/rust-1.90%2B-orange)](Cargo.toml)
 
 ![The library](docs/library.png)
@@ -202,7 +202,8 @@ songonsole --demo --shot opening.png --width 1600 --height 900 --playing --after
 Every picture in this README was taken that way. `--demo` is a made-up library,
 plainly labelled as one, with no audio behind it and nothing of yours touched —
 it never writes a setting. It takes
-`--view songs|albums|artists|favourites|queue` and `--playing`.
+`--view songs|albums|artists|favourites|queue`, `--playing`, and `--rail` for
+the light on the rail rather than in the list.
 
 [`docs/verification.md`](docs/verification.md) says what has actually been run
 against this, and — as plainly — what has not.

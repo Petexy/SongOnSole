@@ -52,6 +52,49 @@ fn shape(at: [f32; 4], s: f32, foot: f32) -> Shape {
     let loud_y = controls_y - 12.0 * s - bar_h;
     let where_y = loud_y - 4.0 * s - bar_h;
     let body_bottom = where_y - 24.0 * s;
+    let bars = [
+        [x + margin, where_y, across, bar_h],
+        // Narrower, and centred: a volume groove the width of the window
+        // is a control that wants a hand steadier than anybody has.
+        [
+            x + margin + (across - (across * 0.34).clamp(200.0 * s, 420.0 * s)) * 0.5,
+            loud_y,
+            (across * 0.34).clamp(200.0 * s, 420.0 * s).min(across),
+            bar_h,
+        ],
+    ];
+    let controls = [x + margin, controls_y, across, row_h];
+
+    // **Standing on its side the page is one column.** Beside the record there
+    // is room for the words or for the queue and not for both — a record, a
+    // title cut to a handful of letters, and a queue of names cut to nothing
+    // was what a tall window got — and under it there is all the room in the
+    // world. So the record stands centred at the top, as large as two thirds
+    // of the width and never more than under half the height; the four lines
+    // about it under it, as wide as it is; and what is next under those, the
+    // width of the page, down to the bars. The transport is the same row
+    // either way.
+    if h > w {
+        let room = (body_bottom - top).max(0.0);
+        let side = (across * 0.62).min(room * 0.45).max(48.0 * s);
+        let art = [x + (w - side) * 0.5, top, side, side];
+        let words = [art[0], art[1] + side + 18.0 * s, side, WORDS_TALL * s];
+        let queue_top = words[1] + words[3] + 10.0 * s;
+        return Shape {
+            margin,
+            art,
+            words,
+            queue: [
+                x + margin,
+                queue_top,
+                across,
+                (body_bottom - queue_top).max(1.0),
+            ],
+            bars,
+            controls,
+        };
+    }
+
     let queue_w = (w * QUEUE_SHARE).min(380.0 * s);
     let left_w = across - queue_w - 28.0 * s;
     let side = (body_bottom - top)
@@ -77,20 +120,15 @@ fn shape(at: [f32; 4], s: f32, foot: f32) -> Shape {
             queue_w,
             body_bottom - (y + 74.0 * s),
         ],
-        bars: [
-            [x + margin, where_y, across, bar_h],
-            // Narrower, and centred: a volume groove the width of the window
-            // is a control that wants a hand steadier than anybody has.
-            [
-                x + margin + (across - (across * 0.34).clamp(200.0 * s, 420.0 * s)) * 0.5,
-                loud_y,
-                (across * 0.34).clamp(200.0 * s, 420.0 * s).min(across),
-                bar_h,
-            ],
-        ],
-        controls: [x + margin, controls_y, across, row_h],
+        bars,
+        controls,
     }
 }
+
+/// How tall the four lines about the record are, from the top of the title to
+/// the foot of the line that says what is on: `page` writes them about the
+/// middle of this, 78 above it to 82 below.
+const WORDS_TALL: f32 = 164.0;
 
 /// Where the large sleeve goes on a page of this size.
 ///
@@ -185,7 +223,9 @@ pub fn page(
     let current = state.current();
     let arrived = entry(since, 0);
     let lift = (1.0 - arrived) * 20.0 * s;
-    let middle = shape.art[1] + shape.art[3] * 0.5;
+    // About the middle of the words' own block: beside the record that is the
+    // record's middle, and under it on a page standing on its side.
+    let middle = shape.words[1] + shape.words[3] * 0.5;
     label_faded(
         ui,
         [words_x, middle - 78.0 * s + lift, words_w, 46.0 * s],
@@ -454,7 +494,7 @@ mod tests {
     }
 
     fn the_page_holds_together(w: f32, h: f32) {
-        let s = h / 800.0;
+        let s = crate::draw::scale(w, h);
         let foot = 64.0 * lxb_toolkit::metrics::scale_for(h);
         let shape = shape([0.0, 0.0, w, h], s, foot);
         let named = [
@@ -508,7 +548,7 @@ mod tests {
             (3840.0, 2160.0),
             (1280.0, 400.0),
         ] {
-            let s = h / 800.0;
+            let s = crate::draw::scale(w, h);
             let foot = draw::FOOT * lxb_toolkit::metrics::scale_for(h);
             let art = sleeve_rect([0.0, 0.0, w, h], s, foot);
             assert!(art[2] > 0.0 && (art[2] - art[3]).abs() < 1e-3, "{w}x{h}");

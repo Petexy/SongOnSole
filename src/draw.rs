@@ -191,6 +191,17 @@ pub fn foot(ui: &Ui) -> f32 {
     ui.s(FOOT)
 }
 
+/// How large everything this application draws is, in a window this size: its
+/// own 800-pixel reference measured against the window's height.
+///
+/// The height because the words on every page are the toolkit's, and the
+/// toolkit sizes them by the height: a page measured any other way is a page
+/// whose rows and the words in them come apart, which on a window standing on
+/// its side is by the whole of the difference between its two sides.
+pub fn scale(_width: f32, height: f32) -> f32 {
+    height / 800.0
+}
+
 /// Where the row of hints sits inside that band: the middle of it.
 ///
 /// A function rather than a sum written out at the one place it is needed,
@@ -420,13 +431,29 @@ pub struct View<'a> {
 pub fn draw(state: &mut Music, page: &mut Page) {
     let width = page.width();
     let height = page.height();
+    // The view's slide between the rail and the browser, on a window too
+    // narrow for the two side by side: over to the browser once the light goes
+    // into it, back to the rail once it comes out, and wherever it was while
+    // the light is in the strip, which stands under both.
+    match state.zone {
+        Zone::Sidebar => state.facing_browser = false,
+        Zone::Library => state.facing_browser = true,
+        _ => {}
+    }
+    let laid = browser_beside(width, scale(width, height));
+    state
+        .slide
+        .follow(laid.target(state.facing_browser), state.dt);
+    if state.slide.moving() {
+        page.redraw_within(std::time::Duration::from_millis(16));
+    }
     let icons = page.icons();
     let pad = page.pad_in_hand();
     let hints = hints(state);
     let seconds = state.seconds;
     let whole = [0.0, 0.0, width, height];
     let ui = page.ui();
-    let s = height / 800.0;
+    let s = scale(width, height);
 
     let mut light = state.light;
     let mut placed = Placed::default();
@@ -639,7 +666,7 @@ fn standing_in<'a>(
     let grown = crossing.grown(state.seconds);
     let landed = match crossing.what {
         Change::Playing => playing::sleeve_rect(moved, s, foot),
-        Change::Group => heading_sleeve(moved, s),
+        Change::Group => heading_sleeve(slid(state, moved, s).0, s),
     };
     let cover = match crossing.what {
         Change::Playing => state.sleeve(),
@@ -736,6 +763,12 @@ fn card_at(body: [f32; 4], s: f32, since: f32, slot: usize, dip: Option<f32>) ->
 fn strip_words(strip: [f32; 4], s: f32) -> (f32, f32) {
     let [x, _, w, h] = strip;
     let pad = 14.0 * s;
+    // Stacked, the record and its words are a row of their own across the
+    // whole strip, and the words have all of it after the record.
+    if stacked(strip, s) {
+        let at = x + pad + STACKED_ART * s + 16.0 * s;
+        return (at, (x + w - pad - at).max(1.0));
+    }
     let at = x + pad + (h - pad * 2.0) + 16.0 * s;
     // **A floor is only a floor while there is a floor to stand on.** This
     // wants a share of the strip and at least 150 of them, but 150 at this
@@ -764,10 +797,20 @@ fn strip_words(strip: [f32; 4], s: f32) -> (f32, f32) {
 fn bars_at(strip: [f32; 4], s: f32) -> [[f32; 4]; 2] {
     let [x, y, w, _] = strip;
     let pad = 14.0 * s;
-    let (words_x, words_w) = strip_words(strip, s);
-    let left = words_x + words_w + 14.0 * s;
-    let across = (x + w - pad - left).max(1.0);
-    let line = y + pad + 2.0 * s;
+    // Stacked, the two bars are rows of their own under the record, the width
+    // of the strip — room for a groove between the two clocks, which a bar
+    // squeezed in beside the words did not have.
+    let (left, across, line) = if stacked(strip, s) {
+        (
+            x + pad,
+            (w - pad * 2.0).max(1.0),
+            y + pad + STACKED_ART * s + 10.0 * s,
+        )
+    } else {
+        let (words_x, words_w) = strip_words(strip, s);
+        let left = words_x + words_w + 14.0 * s;
+        (left, (x + w - pad - left).max(1.0), y + pad + 2.0 * s)
+    };
     let tall = 30.0 * s;
     [
         [left, line, across, tall],
@@ -812,7 +855,19 @@ fn bar_inside(row: [f32; 4], s: f32) -> [f32; 4] {
 /// drawn at all, and by the crossing, which grows the Now Playing page out of
 /// exactly this rectangle.
 pub fn now_playing_at(strip: [f32; 4], s: f32) -> [f32; 4] {
-    let [x, y, _, h] = strip;
+    let [x, y, w, h] = strip;
+    let inset = 7.0 * s;
+    // Stacked, the record and its words are the top row of the strip, the
+    // strip's own width.
+    if stacked(strip, s) {
+        let pad = 14.0 * s;
+        return [
+            x + inset,
+            y + inset,
+            (w - inset * 2.0).max(1.0),
+            (STACKED_ART * s + (pad - inset) * 2.0).max(1.0),
+        ];
+    }
     let (words_x, words_w) = strip_words(strip, s);
     // **Round the sleeve as well as the words.** The highlight is what says
     // this row is a thing you can press, and a highlight that cut across the
@@ -820,7 +875,6 @@ pub fn now_playing_at(strip: [f32; 4], s: f32) -> [f32; 4] {
     // out of the bottom of it. Which is why the row of buttons was moved out
     // from under the name: everything to the right of this block is the
     // column of three the light walks down, and nothing else shares its room.
-    let inset = 7.0 * s;
     [
         x + inset,
         y + inset,
@@ -837,6 +891,8 @@ pub fn now_playing_at(strip: [f32; 4], s: f32) -> [f32; 4] {
 fn controls_at(strip: [f32; 4], s: f32) -> [f32; 4] {
     let [x, y, w, h] = strip;
     let pad = 14.0 * s;
+    // Under the bars and lined up with them, whichever way the strip is laid:
+    // stacked, they start at the strip's own edge, and so does the row.
     let left = bars_at(strip, s)[0][0];
     let row_h = 46.0 * s;
     [
@@ -993,6 +1049,58 @@ fn heading_sleeve(view: [f32; 4], s: f32) -> [f32; 4] {
     ]
 }
 
+/// The narrowest the browser beside the rail can be and still be the browser,
+/// in this application's reference pixels. Every landscape window, and a
+/// square one, has more; a window standing on its side does not, and there
+/// the view slides between the rail and the browser instead of squeezing the
+/// browser into what is left beside the rail.
+const BROWSER_LEAST: f32 = 480.0;
+
+/// Where the browser stands beside the rail in a window `width` wide, and how
+/// far the view slides over to it — nought wherever the two fit side by side.
+/// The toolkit's `layout::beside`, with the rail's own numbers: the same rule
+/// LineXinBar's Home menu keeps between its column and its cards.
+pub fn browser_beside(width: f32, s: f32) -> lxb_toolkit::layout::Beside {
+    lxb_toolkit::layout::beside(width, 24.0 * s, 184.0 * s, 18.0 * s, BROWSER_LEAST * s)
+}
+
+/// The page `at`, slid as far as the view has got towards the browser, and
+/// how the rail and the browser share it. One sum, read by the library as it
+/// draws and by a crossing growing an album's sleeve into its heading.
+fn slid(state: &Music, at: [f32; 4], s: f32) -> ([f32; 4], lxb_toolkit::layout::Beside) {
+    let laid = browser_beside(at[2], s);
+    let pan = state.slide.at.clamp(0.0, laid.reach);
+    ([at[0] - pan, at[1], at[2], at[3]], laid)
+}
+
+/// The strip's own least width for the record, its words, the two bars and the
+/// row of buttons to stand side by side, in reference pixels. Every landscape
+/// window and a square one has more; narrower, the strip stacks them.
+const STRIP_LEAST: f32 = 680.0;
+
+/// How tall the strip is with everything side by side, and stacked.
+const STRIP_TALL: f32 = 148.0;
+const STRIP_STACKED: f32 = 254.0;
+
+/// The record at the head of a stacked strip.
+const STACKED_ART: f32 = 96.0;
+
+/// Whether a strip this wide stacks its record, bars and buttons one above the
+/// other rather than setting them side by side — where side by side the
+/// position bar would be too short to hold its two clocks apart.
+fn stacked(strip: [f32; 4], s: f32) -> bool {
+    strip[2] < STRIP_LEAST * s
+}
+
+/// How tall the strip is at this width: taller once it stacks.
+pub fn strip_height(width: f32, s: f32) -> f32 {
+    if width < STRIP_LEAST * s {
+        STRIP_STACKED * s
+    } else {
+        STRIP_TALL * s
+    }
+}
+
 /// The library screen: the rail, the browser and the strip along the bottom.
 ///
 /// Answers where it put the browser's rows and where it put the strip, so that
@@ -1010,12 +1118,17 @@ fn library(
     let (icons, s) = (paint.icons, paint.s);
     let [ox, oy, width, height] = at;
     let margin = 24.0 * s;
-    let gap = 18.0 * s;
     let rail_w = 184.0 * s;
-    let content_x = ox + margin + rail_w + gap;
-    let content_w = width - margin * 2.0 - rail_w - gap;
+    // Beside the rail where there is room for it, and past the right-hand edge
+    // of a window too narrow for both, with the whole view slid over to the
+    // browser while the light is in it — see `browser_beside`. Everything of
+    // the rail and of the browser is measured from `slid`; the head across the
+    // top and the strip across the foot are the window's, and stay put.
+    let (slid, laid) = slid(state, at, s);
+    let content_x = slid[0] + laid.page_x;
+    let content_w = laid.page_w;
     let top = oy + 106.0 * s;
-    let strip_h = 148.0 * s;
+    let strip_h = strip_height(width - margin * 2.0, s);
     // The strip stands **on** the legend's band rather than across it, and the
     // browser stops a hair above the strip. One sum, read by the rail as well,
     // because a rail that worked its own bottom out separately is a rail whose
@@ -1040,7 +1153,7 @@ fn library(
     // row, sleeve and mark, whichever of them it is on and whichever two of
     // them it is between. See `light_on`.
     ui.card(
-        [ox + margin, top, rail_w, bottom - top],
+        [slid[0] + margin, top, rail_w, bottom - top],
         Surface::Sidebar,
         Role::Glass,
         0.65,
@@ -1053,16 +1166,16 @@ fn library(
     // tab — a highlight with a tab painted on top of it.
     let opened = state.seconds - state.opened;
     ui.card(
-        tab_at(at, s, opened, state.tab),
+        tab_at(slid, s, opened, state.tab),
         Surface::Control,
         Role::Accent,
         0.24 * entry(opened, state.tab),
     );
-    if let Some((rect, shape)) = light_on(state, view, at, body, strip, paint) {
+    if let Some((rect, shape)) = light_on(state, view, slid, body, strip, paint) {
         focus(ui, light, rect, shape);
     }
 
-    rail(state, ui, paint, at, bottom);
+    rail(state, ui, paint, slid, bottom);
 
     let title = if view.title.is_empty() {
         state.title()
@@ -1077,7 +1190,7 @@ fn library(
     let mut heading_x = content_x;
     let mut heading_w = content_w;
     if view.group {
-        let art = heading_sleeve(at, s);
+        let art = heading_sleeve(slid, s);
         if view.sleeve {
             sleeve(ui, art, view.cover, icons, 1.0);
         }
@@ -1506,7 +1619,12 @@ pub fn bar(state: &Music, ui: &mut Ui, at: [f32; 4], paint: Paint, placed: &mut 
     let (icons, s, live) = (paint.icons, paint.s, paint.live);
     let [x, y, _, h] = at;
     let pad = 14.0 * s;
-    let art_side = h - pad * 2.0;
+    let stacked = stacked(at, s);
+    let art_side = if stacked {
+        STACKED_ART * s
+    } else {
+        h - pad * 2.0
+    };
     let art = [x + pad, y + pad, art_side, art_side];
     let fade = ((state.seconds - state.sleeve_at) / lxb_toolkit::motion::duration::COLOUR_FADE)
         .clamp(0.0, 1.0);
@@ -1514,7 +1632,13 @@ pub fn bar(state: &Music, ui: &mut Ui, at: [f32; 4], paint: Paint, placed: &mut 
 
     let current = state.current();
     let (words_x, words_w) = strip_words(at, s);
-    let line = y + pad + 6.0 * s;
+    // Beside a record as tall as the strip the two lines hang from its top;
+    // beside the smaller one of a stacked strip they stand in its middle.
+    let line = if stacked {
+        y + pad + (art_side - 52.0 * s) * 0.5
+    } else {
+        y + pad + 6.0 * s
+    };
     label(
         ui,
         [words_x, line, words_w, 30.0 * s],
@@ -1921,13 +2045,18 @@ mod tests {
             (640.0, 400.0),
             (3840.0, 2160.0),
             (1280.0, 400.0),
+            // Standing on its side, where the strip stacks them.
+            (1080.0, 1920.0),
+            (620.0, 1473.0),
+            (800.0, 1280.0),
         ] {
-            let s = h / 800.0;
+            let s = scale(w, h);
+            let strip_h = strip_height(w - 48.0 * s, s);
             let strip = [
                 24.0 * s,
-                h - 64.0 * lxb_toolkit::metrics::scale_for(h) - 148.0 * s,
+                h - 64.0 * lxb_toolkit::metrics::scale_for(h) - strip_h,
                 w - 48.0 * s,
-                148.0 * s,
+                strip_h,
             ];
             let [where_at, how_loud] = bars_at(strip, s);
             let buttons = controls_at(strip, s);
@@ -1986,9 +2115,9 @@ mod tests {
     }
 
     fn the_strip_holds_together(w: f32, h: f32) {
-        let s = h / 800.0;
+        let s = scale(w, h);
         let margin = 24.0 * s;
-        let strip_h = 148.0 * s;
+        let strip_h = strip_height(w - margin * 2.0, s);
         let strip = [
             margin,
             h - 64.0 * lxb_toolkit::metrics::scale_for(h) - strip_h,
@@ -2022,6 +2151,52 @@ mod tests {
         }
     }
 
+    /// On a window standing on its side the rail keeps its width and the view
+    /// slides between it and the browser: the rail whole while it has the
+    /// light, with the browser peeking in at the right, and the browser whole
+    /// while it has the light, wider than it could ever be beside the rail,
+    /// with a strip of the rail at the left. A landscape window, and a square
+    /// one, lay the two side by side exactly as they always were, and never
+    /// slide.
+    #[test]
+    fn a_window_standing_on_its_side_slides_between_the_rail_and_the_browser() {
+        for (w, h) in [
+            (1280.0f32, 800.0f32),
+            (960.0, 600.0),
+            (1920.0, 1080.0),
+            (1024.0, 768.0),
+            (1080.0, 1080.0),
+        ] {
+            let s = scale(w, h);
+            let laid = browser_beside(w, s);
+            assert_eq!(laid.reach, 0.0, "{w}x{h} slides");
+            assert!((laid.page_x - (24.0 + 184.0 + 18.0) * s).abs() < 1e-3);
+            assert!(
+                (laid.page_w - (w - 48.0 * s - 184.0 * s - 18.0 * s)).abs() < 1e-2,
+                "{w}x{h}: the browser is not the width it always was"
+            );
+        }
+        for (w, h) in [(1080.0f32, 1920.0f32), (800.0, 1280.0), (720.0, 1280.0)] {
+            let s = scale(w, h);
+            let laid = browser_beside(w, s);
+            assert!(laid.reach > 0.0, "{w}x{h} does not slide");
+            assert!((24.0 + 184.0) * s <= w, "{w}x{h}: the rail is not whole");
+            let browser = laid.page_x - laid.reach;
+            assert!(
+                browser >= 0.0 && browser + laid.page_w <= w + 0.01,
+                "{w}x{h}: the browser is not whole once slid to"
+            );
+            assert!(
+                (24.0 + 184.0) * s - laid.reach > 0.0,
+                "{w}x{h}: none of the rail left in view"
+            );
+            assert!(
+                laid.page_w > w - (24.0 + 184.0 + 18.0 + 24.0) * s,
+                "{w}x{h}: sliding did not widen the browser"
+            );
+        }
+    }
+
     /// Whether two rectangles share any pixel. The hair of slack is for the
     /// ones that are laid edge to edge on purpose.
     fn over(a: [f32; 4], b: [f32; 4]) -> bool {
@@ -2046,13 +2221,18 @@ mod tests {
             (640.0, 400.0),
             (3840.0, 2160.0),
             (1280.0, 400.0),
+            // Standing on its side, where the strip stacks them.
+            (1080.0, 1920.0),
+            (620.0, 1473.0),
+            (800.0, 1280.0),
         ] {
-            let s = h / 800.0;
+            let s = scale(w, h);
+            let strip_h = strip_height(w - 48.0 * s, s);
             let strip = [
                 24.0 * s,
-                h - 64.0 * lxb_toolkit::metrics::scale_for(h) - 148.0 * s,
+                h - 64.0 * lxb_toolkit::metrics::scale_for(h) - strip_h,
                 w - 48.0 * s,
-                148.0 * s,
+                strip_h,
             ];
             for row in bars_at(strip, s) {
                 let inside = bar_inside(row, s);
